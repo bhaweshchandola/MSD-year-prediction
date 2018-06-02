@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 #Import the dataset
 df = pd.read_csv("Restaurant_Reviews.tsv", delimiter = '\t', quoting = 3)
 df
-df1 = df
 
 
 #Cleaning the texts
@@ -56,4 +55,26 @@ for i in range(len(df)):
 #since here we will have multiple 0 we will have a sparse matrix
 
 from sklearn.feature_extraction.text import CountVectorizer
-cv = CountVectorizer()
+cv = CountVectorizer(max_features = 1500) 
+#as currently there too many columns and it also contains columns for words that are not too frequent
+#like names of people or even words which only occur one or two times
+x = cv.fit_transform(corpus).toarray()
+y = df.iloc[:, 1].values
+
+#final classification through naive bayes 
+from sklearn.cross_validation import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.20, random_state = 0)
+
+classifier = GaussianNB()
+classifier.fit(x_train, y_train)
+
+y_pred = classifier.predict(x_test)
+
+cm = confusion_matrix(y_test, y_pred)
+
+#accuracy of the model
+
+(cm[0][0]+cm[1][1])/200
